@@ -1,0 +1,360 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {"default": "VPC Cidr Block Configuration"},
+                    "Parameters": ["Cidr"]
+                },
+                {
+                    "Label": {"default": "IP Address Configuration for Application Subnets"},
+                    "Parameters": ["AppSubnet1", "AppSubnet2", "AppSubnet3"]
+                },
+                {
+                    "Label": {"default": "IP Address Configuration for Data Subnets"},
+                    "Parameters": ["DatSubnet1", "DatSubnet2", "DatSubnet3"]
+                },
+                {
+                    "Label": {"default": "IP Address Configuration for Public Subnets"},
+                    "Parameters": ["PubSubnet1", "PubSubnet2", "PubSubnet3"]
+                }
+                ]
+        }
+        },
+    "Parameters": {
+        "Cidr" : {
+            "Type": "String",
+            "Default": "10.0.0.0/16",
+            "Description": "Enter the cidr for you VPC"
+        },
+        "PubSubnet1": {
+            "Type": "String",
+            "Default": "10.0.248.0/24",
+            "Description": "Enter subnet address for your first public subnet"
+        },
+        "PubSubnet2": {
+            "Type": "String",
+            "Default": "10.0.249.0/24",
+            "Description": "Enter subnet address for your second public subnet"
+        },
+        "PubSubnet3": {
+            "Type": "String",
+            "Default": "10.0.250.0/24",
+            "Description": "Enter subnet address for your third public subnet"
+        },
+        "AppSubnet1": {
+            "Type": "String",
+            "Default": "10.0.0.0/20",
+            "Description": "Enter subnet address for your first application subnet"
+        },
+        "AppSubnet2": {
+            "Type": "String",
+            "Default": "10.0.16.0/20",
+            "Description": "Enter subnet address for your second application subnet"
+        },
+        "AppSubnet3": {
+            "Type": "String",
+            "Default": "10.0.32.0/20",
+            "Description": "Enter subnet address for your third application subnet"
+        },
+        "DatSubnet1": {
+            "Type": "String",
+            "Default": "10.0.48.0/20",
+            "Description": "Enter subnet address for your first data subnet"
+        },
+        "DatSubnet2": {
+            "Type": "String",
+            "Default": "10.0.64.0/20",
+            "Description": "Enter subnet address for your second data subnet"
+        },
+        "DatSubnet3": {
+            "Type": "String",
+            "Default": "10.0.80.0/20",
+            "Description": "Enter subnet address for your third data subnet"
+        }
+    },
+    "Resources": {
+        "VPCSTD": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": { "Ref" : "Cidr" },
+                "EnableDnsSupport": "false",
+                "EnableDnsHostnames": "false",
+                "InstanceTenancy": "default",
+                "Tags": [{"Key": "Name", "Value": "VPCSTD"}]
+            }
+        },
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [ {"Key": "Name", "Value": "InternetGateway"} ]
+            }
+        },
+        "AttachInternetGateway": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "InternetGatewayId": { "Ref": "InternetGateway"},
+                "VpcId": { "Ref": "VPCSTD" }
+            }
+        },
+        "PublicSubnet1": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+            "AvailabilityZone": {
+                "Fn::Select": ["0", {"Fn::GetAZs": ""}]
+            },
+            "CidrBlock": { "Ref": "PubSubnet1" },
+            "MapPublicIpOnLaunch": "false",
+            "Tags": [{"Key": "Name", "Value": "Pub-Sub-1"}],
+            "VpcId": { "Ref" : "VPCSTD"}
+         }
+        },
+        "PublicSubnet2": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+            "AvailabilityZone": {
+                "Fn::Select": ["1", {"Fn::GetAZs": ""}]
+            },
+            "CidrBlock": { "Ref": "PubSubnet2" },
+            "MapPublicIpOnLaunch": "false",
+            "Tags": [{"Key": "Name", "Value": "Pub-Sub-2"}],
+            "VpcId": { "Ref" : "VPCSTD"}
+         }
+        },
+        "PublicSubnet3": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+            "AvailabilityZone": {
+                "Fn::Select": ["2", {"Fn::GetAZs": ""}]
+            },
+            "CidrBlock": { "Ref": "PubSubnet3" },
+            "MapPublicIpOnLaunch": "false",
+            "Tags": [{"Key": "Name", "Value": "Pub-Sub-3"}],
+            "VpcId": { "Ref" : "VPCSTD"}
+         }
+        },
+        "ApplicationSubnet1": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+              "AvailabilityZone": {
+                  "Fn::Select": ["0", {"Fn::GetAZs": ""}]
+              },
+              "CidrBlock": {"Ref": "AppSubnet1"},
+              "Tags": [{"Key": "Name", "Value": "Application-Sub-1"}],
+              "VpcId": { "Ref": "VPCSTD"}
+          }
+        },
+        "ApplicationSubnet2": {
+          "Type": "AWS::EC2::Subnet",
+          "Properties": {
+              "AvailabilityZone": {
+                  "Fn::Select": ["1", {"Fn::GetAZs": ""}]
+              },
+              "CidrBlock": {"Ref": "AppSubnet2"},
+              "Tags": [{"Key": "Name", "Value": "Application-Sub-2"}],
+              "VpcId": { "Ref": "VPCSTD"}
+          }
+        },
+          "ApplicationSubnet3": {
+              "Type": "AWS::EC2::Subnet",
+              "Properties": {
+                  "AvailabilityZone": {
+                      "Fn::Select": ["2", {"Fn::GetAZs": ""}]
+                  },
+                  "CidrBlock": {"Ref": "AppSubnet3"},
+                  "Tags": [{"Key": "Name", "Value": "Application-Sub-3"}],
+                  "VpcId": { "Ref": "VPCSTD"}
+              }
+        },
+          "DataSubnet1": {
+              "Type": "AWS::EC2::Subnet",
+              "Properties": {
+                  "AvailabilityZone": {
+                      "Fn::Select": ["0", {"Fn::GetAZs": ""}]
+                  },
+                  "CidrBlock": {"Ref": "DatSubnet1"},
+                  "Tags": [{"Key": "Name", "Value": "Data-Sub-1"}],
+                  "VpcId": { "Ref": "VPCSTD"}
+              }
+        },
+         "DataSubnet2": {
+              "Type": "AWS::EC2::Subnet",
+              "Properties": {
+                  "AvailabilityZone": {
+                      "Fn::Select": ["1", {"Fn::GetAZs": ""}]
+                  },
+                  "CidrBlock": {"Ref": "DatSubnet2"},
+                  "Tags": [{"Key": "Name", "Value": "Data-Sub-2"}],
+                  "VpcId": { "Ref": "VPCSTD"}
+              }
+        },
+         "DataSubnet3": {
+              "Type": "AWS::EC2::Subnet",
+              "Properties": {
+                  "AvailabilityZone": {
+                      "Fn::Select": ["2", {"Fn::GetAZs": ""}]
+                  },
+                  "CidrBlock": {"Ref": "DatSubnet3"},
+                  "Tags": [{"Key": "Name", "Value": "Data-Sub-3"}],
+                  "VpcId": { "Ref": "VPCSTD"}
+              }
+        },
+        "EIPNat1": {
+            "Type": "AWS::EC2::EIP",
+            "Properties": {
+                "Domain": "Vpc",
+                "Tags": [{"Key": "Name", "Value": "EIP-NatGateway-PublicSubnet1"}],
+            },
+            "DependsOn": "InternetGateway"
+        },
+        "NatGatewayPublicSubnet1": {
+            "Type": "AWS::EC2::NatGateway",
+            "Properties": {
+                "AllocationId": { "Fn::GetAtt": ["EIPNat1", "AllocationId"]},
+                "SubnetId": {"Ref": "PublicSubnet1"},
+                "Tags": [ {"Key": "Name", "Value": "NatGateway-PublicSubnet1"} ]
+            }
+        }, 
+         "RTPublic": {
+             "Type": "AWS::EC2::RouteTable",
+             "Properties": {
+                 "Tags": [{"Key": "Name", "Value": "RT-Public"}],
+                 "VpcId": {"Ref": "VPCSTD"}
+             }
+        },
+         "RTApplication": {
+             "Type": "AWS::EC2::RouteTable",
+             "Properties": {
+                 "Tags": [{"Key": "Name", "Value": "RT-Application"}],
+                 "VpcId": {"Ref": "VPCSTD"}
+             }
+        },
+         "RTData": {
+             "Type": "AWS::EC2::RouteTable",
+             "Properties": {
+                 "Tags": [{"Key": "Name", "Value": "RT-Data"}],
+                 "VpcId": {"Ref": "VPCSTD"}
+             }
+         },
+         "RTPubAssociationPublicSubnet1": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "PublicSubnet1"},
+                 "RouteTableId": {"Ref": "RTPublic"}
+             }
+         },
+         "RTPubAssociationPublicSubnet2": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "PublicSubnet2"},
+                 "RouteTableId": {"Ref": "RTPublic"}
+             }
+         },
+         "RTPubAssociationPublicSubnet3": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "PublicSubnet3"},
+                 "RouteTableId": {"Ref": "RTPublic"}
+             }
+         },
+         "RTPubAssociationAppSubnet1": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "ApplicationSubnet1"},
+                 "RouteTableId": {"Ref": "RTApplication"}
+             }
+         },
+         "RTPubAssociationAppSubnet2": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "ApplicationSubnet2"},
+                 "RouteTableId": {"Ref": "RTApplication"}
+             }
+         },
+         "RTPubAssociationAppSubnet3": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "ApplicationSubnet3"},
+                 "RouteTableId": {"Ref": "RTApplication"}
+             }
+         },
+         "RTPubAssociationDataSubnet1": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "DataSubnet1"},
+                 "RouteTableId": {"Ref": "RTData"}
+             }
+         },
+         "RTPubAssociationDataSubnet2": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "DataSubnet2"},
+                 "RouteTableId": {"Ref": "RTData"}
+             }
+         },
+         "RTPubAssociationDataSubnet3": {
+             "Type": "AWS::EC2::SubnetRouteTableAssociation",
+             "Properties": {
+                 "SubnetId": {"Ref": "DataSubnet3"},
+                 "RouteTableId": {"Ref": "RTData"}
+             }
+         },
+         "RouteToInternetGatewayPub": {
+             "Type": "AWS::EC2::Route",
+             "Properties": {
+                 "DestinationCidrBlock": "0.0.0.0/0",
+                 "GatewayId": { "Ref": "InternetGateway"},
+                 "RouteTableId": {"Ref": "RTPublic"},
+                 
+             },
+             "DependsOn": "InternetGateway"
+         },
+         "RouteToNatGatewayApp": {
+             "Type": "AWS::EC2::Route",
+             "Properties": {
+                 "DestinationCidrBlock": "0.0.0.0/0",
+                 "NatGatewayId": {"Ref": "NatGatewayPublicSubnet1"},
+                 "RouteTableId": {"Ref": "RTApplication"}
+             }
+         },
+         "RouteToNatGatewayData": {
+             "Type": "AWS::EC2::Route",
+             "Properties": {
+                 "DestinationCidrBlock": "0.0.0.0/0",
+                 "NatGatewayId": {"Ref": "NatGatewayPublicSubnet1"},
+                 "RouteTableId": {"Ref": "RTData"}
+             }
+         },
+         "S3GatewayEndpoint": {
+            "Type": "AWS::EC2::VPCEndpoint",
+            "Properties": {
+                "VpcEndpointType": "Gateway",
+                "VpcId": {"Ref": "VPCSTD"},
+                "RouteTableIds": [
+                    {
+                        "Ref": "RTPublic", 
+                        "Ref": "RTApplication",
+                        "Ref": "RTData"
+                    }
+                ],
+                "ServiceName": { "Fn::Sub": "com.amazonaws.${AWS::Region}.s3" }
+            }
+        },
+                 "DynamoDBGatewayEndpoint": {
+            "Type": "AWS::EC2::VPCEndpoint",
+            "Properties": {
+                "VpcEndpointType": "Gateway",
+                "VpcId": {"Ref": "VPCSTD"},
+                "RouteTableIds": [
+                    {
+                        "Ref": "RTPublic", 
+                        "Ref": "RTApplication",
+                        "Ref": "RTData"
+                    }
+                ],
+                "ServiceName": { "Fn::Sub": "com.amazonaws.${AWS::Region}.dynamodb" }
+            }
+        },
+    }
+}
